@@ -1,0 +1,19 @@
+{
+  "name": "tsc-compile-projects",
+  "version": "1.0.0",
+  "main": "./src/index.js",
+  "description": "A package to improve development for projects that use Javascript and Typescript.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nayvcake/tasks-tsc.git"
+  },
+  "author": "nayvcake",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/nayvcake/tasks-tsc/issues"
+  },
+  "homepage": "https://github.com/nayvcake/tasks-tsc#readme"
+}
