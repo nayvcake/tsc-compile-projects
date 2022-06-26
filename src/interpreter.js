@@ -1,4 +1,38 @@
-const EventEmitter = require('events')
+const EventEmitter = require('events');
+const {
+  Event
+} = require('./events');
+const {
+  Tracking
+} = require('./tracking');
+const {
+  Validator
+} = require('./validator');
+
+/**
+ * @description A small package to decorate the metadata entry.
+ */
+class MetadataInterPreter {
+  constructor(options = {
+    /**
+     * @description Event ID to understand the encoding of the log.
+     */
+    eventName: Event.EVENT_UNKNOWN,
+    /**
+     * @description Log metadata to select and insert event metadata and to improvise data in required functions.
+     */
+    metadata: {},
+  }) {
+    /**
+     * @description Event ID to understand the encoding of the log.
+     */
+    this.eventName = options.eventName
+    /**
+     * @description Log metadata to select and insert event metadata and to improvise data in required functions.
+     */
+    this.metadata = options.metadata
+  }
+}
 
 /**
  * @description Typescript interpreter interface to identify and load interpreter metadata and then forward to layers for better support for hot loading.
@@ -8,10 +42,14 @@ class InterpreterInterface extends EventEmitter {
     super();
   }
 
-  
-
-
-
+  /**
+   * @description A method that will manage the events to trigger the event load in the class mainly being extended to the main base. Once the data is analyzed we will be able to manage the events better to have the best hot reload.
+   */
+  eventOn(metadataInterpreter = new MetadataInterPreter()) {
+    const parse = ReadingData.parsingData(metadataInterpreter.metadata)
+    this.emit(parse.event, parse.metadata, metadataInterpreter, this)
+    this.emit('debug', parse.metadata, metadataInterpreter, this)
+  }
 }
 
 
@@ -67,37 +105,37 @@ class IdentifyInterpreter {
     /**
      * @description There are several events to identify and resolve function
      */
-    this.eventType = options.eventType ?? ''
+    this.eventType = typeof options.eventType != 'string' ? options.eventType : ''
     /**
      * @description Reminder metadata for things important to development.
 
      */
-    this.metadata = options.metadata ?? {}
+    this.metadata = typeof options.metadata != 'object' ? options.metadata : {}
     /**
      * @description Error enlisting occurred in Typescript
      * 
      */
-    this.errors = options.errors ?? []
+    this.errors = typeof options.errors != 'object' ? options.errors : []
     /**
      * @description Maybe someday you 'll have use for it...
      */
-    this.payload = options.payload ?? {}
+    this.payload = typeof options.payload != 'object' ? options.payload : {}
     /**
      * @description Identified has already been named in such events.
      */
-    this.label = options.label ?? []
+    this.label = typeof options.label != 'object' ? options.label : []
     /**
      * @description Small graph for CPU spike register that was created during the execution of the Typescript command.
      */
-    this.tags = options.tags ?? []
+    this.tags = typeof options.tags != 'object' ? options.tags : []
     /**
      * @description Application was forced to restart due to excessive updates which can cause absurd changes and higher CPU spike.
      */
-    this.forceRestart = options.tags ?? false
+    this.forceRestart = typeof options.forceRestart === 'boolean' ? options.forceRestart : false
     /**
      * @description Estimated time marker for identification execution.
      */
-    this.time = options.time ?? 0
+    this.time = typeof options.time === 'number' ? options.time : 0
   }
 }
 
@@ -106,8 +144,40 @@ class IdentifyInterpreter {
  * @description Read the log data to be able to identify possible errors, warnings, trace, debug, and other unknown logs.
  */
 class ReadingData {
-  parsingData() {
-    
+  /**
+   * @description Analyzing the metadata to choose the best data important to the events.
+   * @param {*} event 
+   * @param {*} data 
+   * @returns 
+   */
+  static parsingData(event = Event.EVENT_UNKNOWN, data = '') {
+    switch (event) {
+      case Event.ERROR_TS: {
+        return {
+          event: Event.ERROR_TS,
+          metadata: Tracking.trackError(data),
+        }
+      }
+      case Event.EVENT_ANY: {
+        return {
+          event: Event.EVENT_ANY,
+          metadata: Tracking.trackOther(data),
+        }
+      }
+      case Event.STARTING_COMPILATION: {
+        return {
+          event: Event.STARTING_COMPILATION,
+          metadata: Tracking.trackError(data),
+        }
+      }
+
+      case Event.EVENT_FIND_COUNT_OF_ERROR: {
+        return {
+          event: Event.EVENT_FIND_COUNT_OF_ERROR,
+          metadata: Tracking.trackInfo(data),
+        }
+      }
+    }
   }
 }
 
@@ -121,9 +191,33 @@ module.exports = class TSInterpreter extends InterpreterInterface {
    * @description Identify which event is being handled to finally be valid and load to other resources.
    * @returns Validator
    */
-  getEvent() {
-    
+  validateEvent(data) {
+    let isValid = false
+    let eventName = ''
+
+    if (Validator.validatorAnyLog(data)) {
+      isValid = true
+      eventName = Event.EVENT_ANY
+    }
+
+    if (Validator.validatorError(data)) {
+      isValid = true
+      eventName = Event.ERROR_TS
+    }
+
+    if (Validator.validatorCountOfError(data)) {
+      isValid = true
+      eventName = Event.EVENT_FIND_COUNT_OF_ERROR
+    }
+    return {
+      isValid: isValid,
+      eventName: eventName
+    }
   }
+
+
+
+
 
 
 
@@ -145,49 +239,49 @@ module.exports = class TSInterpreter extends InterpreterInterface {
    * @returns 
    */
   static createIdentifyInterpreter(options = {
-      /**
-       * @description There are several events to identify and resolve function
-       */
-      eventType: 'unknown',
-      /**
-       * @description Reminder metadata for things important to development.
+    /**
+     * @description There are several events to identify and resolve function
+     */
+    eventType: 'unknown',
+    /**
+     * @description Reminder metadata for things important to development.
 
-       */
-      metadata: {},
-      /**
-       * @description Error enlisting occurred in Typescript
-       * 
-       */
-      errors: [],
-      /**
-       * @description Maybe someday you 'll have use for it...
-       */
-      payload: {},
-      /**
-       * @description This identifier used in which events... ?
-       */
-      label: [],
-      /**
-       * @description Identified has already been named in such events.
-       */
-      tags: [],
-      /**
-       * @description Small graph for CPU spike register that was created during the execution of the Typescript command.
-       */
-      cpuUsage: [],
-      /**
-       * @description Small graph for MEMORY spike register that was created during the execution of the Typescript command.
-       */
-      memoryUsage: [],
-      /**
-       * @description Application was forced to restart due to excessive updates which can cause absurd changes and higher CPU spike.
-       */
-      forceRestart: false,
-      /**
-       * @description Estimated time marker for identification execution.
-       */
-      time: 0
-    }) {
+     */
+    metadata: {},
+    /**
+     * @description Error enlisting occurred in Typescript
+     * 
+     */
+    errors: [],
+    /**
+     * @description Maybe someday you 'll have use for it...
+     */
+    payload: {},
+    /**
+     * @description This identifier used in which events... ?
+     */
+    label: [],
+    /**
+     * @description Identified has already been named in such events.
+     */
+    tags: [],
+    /**
+     * @description Small graph for CPU spike register that was created during the execution of the Typescript command.
+     */
+    cpuUsage: [],
+    /**
+     * @description Small graph for MEMORY spike register that was created during the execution of the Typescript command.
+     */
+    memoryUsage: [],
+    /**
+     * @description Application was forced to restart due to excessive updates which can cause absurd changes and higher CPU spike.
+     */
+    forceRestart: false,
+    /**
+     * @description Estimated time marker for identification execution.
+     */
+    time: 0
+  }) {
     return new IdentifyInterpreter(options)
   }
 }
