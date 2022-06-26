@@ -7,6 +7,7 @@ const Event = {
   TRACE_TS: 'traceTS',
   ERROR_COMMAND: 'errorCommand',
   LOAD_IDENTIFY: 'loadIdentify',
+  STARTING_COMPILATION: 'startingCompilation'
 }
 
 module.exports = Event

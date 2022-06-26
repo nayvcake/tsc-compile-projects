@@ -4,41 +4,6 @@ const EventEmitter = require('events')
 const TSInterpreter = require('./interpreter')
 
 
-const openDir = async (dir) => {
-  let files = []
-  await fs.readdirSync(dir).map((a, b, c) => {
-    files = c
-  })
-  return files
-}
-
-
-const openFile = async (fileDir) => {
-  let files = null
-  await fs.readFileSync(fileDir).map((a) => {
-    files = a
-  })
-  return files
-}
-
-const openFileAndRead = async (fileDir) => {
-  let files = null
-  files = await fs.readFileSync(fileDir)
-  return files
-}
-
-
-const verify = async (file) => {
-  let isJsonAndFile = false
-  try {
-    JSON.parse(await openFile(file))
-    isJsonAndFile = true
-  } catch (_) {}
-
-  return isJsonAndFile
-}
-
-
 const openTerminal = async (file, options, optionsProject) => {
   const {
     spawn,
@@ -62,7 +27,7 @@ const openTerminal = async (file, options, optionsProject) => {
 
         const terminal = await spawn('tsc', args, {
           shell: true,
-          windowsHide: true,
+          windowsHide: false,
           serialization: 'json'
         });
         resolve()
@@ -75,6 +40,7 @@ const openTerminal = async (file, options, optionsProject) => {
           windowsHide: true,
           serialization: 'json'
         });
+
 
         terminal.stdout.on('close', () => {
           resolve(null)
@@ -146,7 +112,7 @@ const checkProjectSettings = (obj) => {
 }
 
 
-module.exports = class ProjectWrapper extends EventEmitter {
+module.exports = class TSProjectWrapper extends EventEmitter {
   constructor() {
     super()
     this.projects = new Map()
@@ -167,7 +133,7 @@ module.exports = class ProjectWrapper extends EventEmitter {
       for (const project of projects) {
         if (project.watchMode == false) {
           if (checkProject(project)) {
-            const interpreter =  TSInterpreter.createDefault()
+            const interpreter = TSInterpreter.createDefault()
             const terminal = await openTerminal(project.projectDir, project, options)
             const eventTerminal = EventEmitter
             this.emit('startingProject', terminal, this)
@@ -208,37 +174,30 @@ module.exports = class ProjectWrapper extends EventEmitter {
     return this
   }
 
-  static async initializeDefault() {
+  static async initializeDefault(settings = {
+    'hotReload': false,
+    'command': 'node .',
+    'lowCpuUsage': true,
+    'targets': []
+  }) {
     let targets = {}
     let options = {
       'hotReload': true,
-      'command': "node .",
+      'command': 'node .',
       'lowCpuUsage': true,
       'targets': []
     }
-    const searchProjectSettings = await openDir(path.resolve(''))
-    for (const file of searchProjectSettings) {
-      if (file.endsWith('.json')) {
-        if (file === 'projects.json') {
-          if (verify(path.resolve('projects.json'))) {
-            try {
-              const json = JSON.parse(await openFileAndRead(path.resolve('projects.json')))
-              checkProjectSettings(json)
 
-              targets = json.targets
-              options = json
-            } catch (err) {
-              console.error(err)
-              throw err
-            }
+    try {
+      const json = settings
+      checkProjectSettings(json)
 
-            break
-          } else {
-            throw Error('TSC/JS - [-.-] Could not read project settings.')
-          }
-        }
-      }
+      targets = json.targets
+      options = json
+    } catch (err) {
+      console.error(err)
+      throw err
     }
-    return new ProjectWrapper().start(targets, options)
+    return new TSProjectWrapper().start(targets, options)
   }
 }
