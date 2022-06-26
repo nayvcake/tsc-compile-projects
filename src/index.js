@@ -195,7 +195,6 @@ module.exports = class TSProjectWrapper extends EventEmitter {
       targets = json.targets
       options = json
     } catch (err) {
-      console.error(err)
       throw err
     }
     return new TSProjectWrapper().start(targets, options)

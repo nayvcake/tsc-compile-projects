@@ -8,7 +8,7 @@ class InterpreterInterface extends EventEmitter {
     super();
   }
 
-
+  
 
 
 
@@ -122,7 +122,7 @@ module.exports = class TSInterpreter extends InterpreterInterface {
    * @returns Validator
    */
   getEvent() {
-
+    
   }
 
 
