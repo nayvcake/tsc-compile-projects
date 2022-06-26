@@ -71,7 +71,7 @@ const trackInfo = function (msg = '') {
 
 
 
-module.exports = {
+module.exports.Tracking = {
   trackError,
   trackInfo,
   trackOther
