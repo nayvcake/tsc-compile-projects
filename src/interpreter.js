@@ -101,33 +101,93 @@ class IdentifyInterpreter {
   }
 }
 
+
+/**
+ * @description Read the log data to be able to identify possible errors, warnings, trace, debug, and other unknown logs.
+ */
 class ReadingData {
-
-}
-
-
-class TSErrorHandling {
-  constructor(options = {
-    errors: [],
-    bars: [],
-    time: 0,
-    projectMetadata: {}
-  }) {
-
-  }
-}
-
-
-module.exports = class Interpreter {
-
-  getEvent() {
+  parsingData() {
     
   }
+}
 
-  static createDefault() {
+
+/**
+ * @description This class can effectively read and create events to be able to manage hot loading and other library resources.
+ */
+module.exports = class TSInterpreter extends InterpreterInterface {
+
+  /**
+   * @description Identify which event is being handled to finally be valid and load to other resources.
+   * @returns Validator
+   */
+  getEvent() {
+
   }
 
-  static createIdentifyInterpreter(options) {
+
+
+
+
+
+
+  /**
+   * @description Pattern the variables to make reading logs more efficient to get ID logging for feature enhancements.
+   */
+  static createDefault() {
+    return new TSInterpreter()
+  }
+
+
+  /**
+   * @description Create a pattern to identify and make the answer as smart as possible to improve code performance.
+   * @param {*} options 
+   * @returns 
+   */
+  static createIdentifyInterpreter(options = {
+      /**
+       * @description There are several events to identify and resolve function
+       */
+      eventType: 'unknown',
+      /**
+       * @description Reminder metadata for things important to development.
+
+       */
+      metadata: {},
+      /**
+       * @description Error enlisting occurred in Typescript
+       * 
+       */
+      errors: [],
+      /**
+       * @description Maybe someday you 'll have use for it...
+       */
+      payload: {},
+      /**
+       * @description This identifier used in which events... ?
+       */
+      label: [],
+      /**
+       * @description Identified has already been named in such events.
+       */
+      tags: [],
+      /**
+       * @description Small graph for CPU spike register that was created during the execution of the Typescript command.
+       */
+      cpuUsage: [],
+      /**
+       * @description Small graph for MEMORY spike register that was created during the execution of the Typescript command.
+       */
+      memoryUsage: [],
+      /**
+       * @description Application was forced to restart due to excessive updates which can cause absurd changes and higher CPU spike.
+       */
+      forceRestart: false,
+      /**
+       * @description Estimated time marker for identification execution.
+       */
+      time: 0
+    }) {
     return new IdentifyInterpreter(options)
   }
 }

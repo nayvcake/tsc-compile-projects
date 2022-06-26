@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const EventEmitter = require('events')
+const TSInterpreter = require('./interpreter')
 
 
 const openDir = async (dir) => {
@@ -166,6 +167,7 @@ module.exports = class ProjectWrapper extends EventEmitter {
       for (const project of projects) {
         if (project.watchMode == false) {
           if (checkProject(project)) {
+            const interpreter =  TSInterpreter.createDefault()
             const terminal = await openTerminal(project.projectDir, project, options)
             const eventTerminal = EventEmitter
             this.emit('startingProject', terminal, this)

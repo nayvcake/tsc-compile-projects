@@ -1,10 +1,11 @@
 const validatorError = function () {
   
+  return 
 }
 
 
 
-module.exports = {
+module.exports.Validator = {
   validatorError,
 
 }
