@@ -186,7 +186,9 @@ class ReadingData {
  * @description This class can effectively read and create events to be able to manage hot loading and other library resources.
  */
 module.exports = class TSInterpreter extends InterpreterInterface {
+  processIsFinished() {
 
+  }
   /**
    * @description Identify which event is being handled to finally be valid and load to other resources.
    * @returns Validator
