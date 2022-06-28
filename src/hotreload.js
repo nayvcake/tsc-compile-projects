@@ -23,7 +23,11 @@ class BucketLava {
 
  */
 class Hotreload {
-
+  constructor(tag = '') {
+    this.tag = tag
+    this.buckets = []
+    this.restarting = {}
+  }
 }
 
 /**

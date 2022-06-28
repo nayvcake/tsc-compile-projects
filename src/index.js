@@ -90,10 +90,22 @@ const checkProject = (obj) => {
 
 const checkProjectSettings = (obj) => {
   if (obj.command == null) {
-    throw Error('TSC/JS - [0x0] You must have a command. Please check the field target! [target]')
+    throw Error('TSC/JS - [0x0] You must have a command. Please check the field target! [command]')
   }
-  if (obj.command == undefined) {
-    throw Error('TSC/JS - [0x000] You must have a command. Please check the field target! [target]')
+  if (!Array.isArray(obj.command) || typeof obj.command == 'string') {
+    throw Error('TSC/JS - [0x000] You must have a command. Please check the field target! [command]')
+  } else {
+    if (Array.isArray(obj.command)) {
+      let objPosition = -1
+
+
+      for (const cmd in obj.command) {
+        objPosition++
+        if (!Array.isArray(cmd) || typeof cmd == 'string') {
+          throw Error(`TSC/JS - [0x120] You must have a command::[(${objPosition}).'${cmd}']. Please check the field! [command]`)
+        }
+      }
+    }
   }
   if (typeof obj.hotReload != 'boolean') {
     obj.hotReload = false
