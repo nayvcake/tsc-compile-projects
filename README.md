@@ -11,6 +11,4 @@ Currently the code has:
 - [ ] HotReload
 - [ ] Events
 - [ ] When updates are in sub project automatically force the application to be restarted.
-- [X] The code can create terminal to compile the project.
-       - It creates a shell to run `tsc -p [path]` to run Typescript services.
-       - To activate watch mode it is necessary to inform in the project settings.
+- [X] The code can create terminal to compile the project.  It creates a shell to run **`tsc -p [path]`** to run Typescript services. To activate watch mode it is necessary to inform in the project settings.
