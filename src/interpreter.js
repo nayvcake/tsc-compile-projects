@@ -45,10 +45,25 @@ class InterpreterInterface extends EventEmitter {
   /**
    * @description A method that will manage the events to trigger the event load in the class mainly being extended to the main base. Once the data is analyzed we will be able to manage the events better to have the best hot reload.
    */
-  eventOn(metadataInterpreter = new MetadataInterPreter()) {
-    const parse = ReadingData.parsingData(metadataInterpreter.metadata)
+  eventOn(metadataInterpreter = new MetadataInterPreter(), dataOriginal) {
+    if (dataOriginal instanceof Buffer) {
+      dataOriginal = dataOriginal.toString('utf-8')
+    }
+    if (dataOriginal === undefined) {
+      dataOriginal = null
+    }
+    
+    const parse = ReadingData.parsingData(metadataInterpreter.eventName, metadataInterpreter.metadata)
+ 
     this.emit(parse.event, parse.metadata, metadataInterpreter, this)
     this.emit('debug', parse.metadata, metadataInterpreter, this)
+    this.emit('debugData', {
+      eventName: metadataInterpreter.eventName,
+      metadataInterpreter: metadataInterpreter,
+      dataOriginal: dataOriginal,
+      parse: parse,
+      interpreterInterface: this
+    })
   }
 }
 
@@ -105,29 +120,29 @@ class IdentifyInterpreter {
     /**
      * @description There are several events to identify and resolve function
      */
-    this.eventType = typeof options.eventType != 'string' ? options.eventType : ''
+    this.eventType = typeof options.eventType === 'string' ? options.eventType : ''
     /**
      * @description Reminder metadata for things important to development.
 
      */
-    this.metadata = typeof options.metadata != 'object' ? options.metadata : {}
+    this.metadata = typeof options.metadata === 'object' ? options.metadata : {}
     /**
      * @description Error enlisting occurred in Typescript
      * 
      */
-    this.errors = typeof options.errors != 'object' ? options.errors : []
+    this.errors = typeof options.errors === 'object' ? options.errors : []
     /**
      * @description Maybe someday you 'll have use for it...
      */
-    this.payload = typeof options.payload != 'object' ? options.payload : {}
+    this.payload = typeof options.payload === 'object' ? options.payload : {}
     /**
      * @description Identified has already been named in such events.
      */
-    this.label = typeof options.label != 'object' ? options.label : []
+    this.label = typeof options.label === 'object' ? options.label : []
     /**
      * @description Small graph for CPU spike register that was created during the execution of the Typescript command.
      */
-    this.tags = typeof options.tags != 'object' ? options.tags : []
+    this.tags = typeof options.tags === 'object' ? options.tags : []
     /**
      * @description Application was forced to restart due to excessive updates which can cause absurd changes and higher CPU spike.
      */
@@ -136,6 +151,14 @@ class IdentifyInterpreter {
      * @description Estimated time marker for identification execution.
      */
     this.time = typeof options.time === 'number' ? options.time : 0
+  }
+
+
+  parse() {
+    return new MetadataInterPreter({
+      eventName: this.eventType,
+      metadata: this.metadata
+    })
   }
 }
 
@@ -151,6 +174,7 @@ class ReadingData {
    * @returns 
    */
   static parsingData(event = Event.EVENT_UNKNOWN, data = '') {
+
     switch (event) {
       case Event.ERROR_TS: {
         return {
@@ -178,6 +202,10 @@ class ReadingData {
         }
       }
     }
+    return {
+      event: Event.EVENT_UNKNOWN,
+      metadata: {},
+    }
   }
 }
 
@@ -186,16 +214,13 @@ class ReadingData {
  * @description This class can effectively read and create events to be able to manage hot loading and other library resources.
  */
 module.exports = class TSInterpreter extends InterpreterInterface {
-  processIsFinished() {
-
-  }
   /**
    * @description Identify which event is being handled to finally be valid and load to other resources.
    * @returns Validator
    */
   validateEvent(data) {
     let isValid = false
-    let eventName = ''
+    let eventName = Event.EVENT_UNKNOWN
 
     if (Validator.validatorAnyLog(data)) {
       isValid = true
@@ -225,7 +250,48 @@ module.exports = class TSInterpreter extends InterpreterInterface {
 
 
 
+  /**
+   * @description Identify which event is being handled to finally be valid and load to other resources.
+   * @returns Validator
+   */
+  static validateEvent(data) {
+    let isValid = false
+    let eventName = Event.EVENT_UNKNOWN
 
+    if (Validator.validatorStarting(data)) {
+      return {
+        isValid: true,
+        eventName: Event.STARTING_COMPILATION
+      }
+    }
+
+    if (Validator.validatorError(data)) {
+      return {
+        isValid: true,
+        eventName: Event.ERROR_TS
+      }
+    }
+
+
+    if (Validator.validatorAnyLog(data)) {
+      return {
+        isValid: true,
+        eventName: Event.EVENT_ANY
+      }
+    }
+
+    if (Validator.validatorCountOfError(data)) {
+      return {
+        isValid: true,
+        eventName: Event.EVENT_FIND_COUNT_OF_ERROR
+      }
+    }
+
+    return {
+      isValid: isValid,
+      eventName: eventName
+    }
+  }
 
   /**
    * @description Pattern the variables to make reading logs more efficient to get ID logging for feature enhancements.
@@ -286,4 +352,6 @@ module.exports = class TSInterpreter extends InterpreterInterface {
   }) {
     return new IdentifyInterpreter(options)
   }
+
+
 }

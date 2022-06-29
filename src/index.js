@@ -4,7 +4,7 @@ const EventEmitter = require('events')
 const TSInterpreter = require('./interpreter')
 
 
-const openTerminal = async (file, options, optionsProject) => {
+const openTerminal = async (file, options, optionsProject, interpreter) => {
   const {
     spawn,
     spawnSync
@@ -30,6 +30,60 @@ const openTerminal = async (file, options, optionsProject) => {
           windowsHide: false,
           serialization: 'json'
         });
+        let skip = -1
+        terminal.stdout.on('data', async (data) => {
+          skip++;
+          if (skip == 0) return;
+          const event = TSInterpreter.validateEvent(data)
+          const a = TSInterpreter.createIdentifyInterpreter({
+            /**
+             * @description There are several events to identify and resolve function
+             */
+            eventType: event.eventName,
+            /**
+             * @description Reminder metadata for things important to development.
+
+             */
+            metadata: {
+              a: data,
+            },
+            /**
+             * @description Error enlisting occurred in Typescript
+             * 
+             */
+            errors: [],
+            /**
+             * @description Maybe someday you 'll have use for it...
+             */
+            payload: {},
+            /**
+             * @description This identifier used in which events... ?
+             */
+            label: [],
+            /**
+             * @description Identified has already been named in such events.
+             */
+            tags: [],
+            /**
+             * @description Small graph for CPU spike register that was created during the execution of the Typescript command.
+             */
+            cpuUsage: [],
+            /**
+             * @description Small graph for MEMORY spike register that was created during the execution of the Typescript command.
+             */
+            memoryUsage: [],
+            /**
+             * @description Application was forced to restart due to excessive updates which can cause absurd changes and higher CPU spike.
+             */
+            forceRestart: false,
+            /**
+             * @description Estimated time marker for identification execution.
+             */
+            time: 0
+          })
+          interpreter.eventOn(a.parse())
+
+        })
         resolve()
       })
     }
@@ -40,7 +94,60 @@ const openTerminal = async (file, options, optionsProject) => {
           windowsHide: true,
           serialization: 'json'
         });
+        let skip = -1
+        terminal.stdout.on('data', async (data) => {
+          skip++;
+          if (skip == 0) return;
+          const event = TSInterpreter.validateEvent(data)
+          const a = TSInterpreter.createIdentifyInterpreter({
+            /**
+             * @description There are several events to identify and resolve function
+             */
+            eventType: event.eventName,
+            /**
+             * @description Reminder metadata for things important to development.
 
+             */
+            metadata: {
+              a: data,
+            },
+            /**
+             * @description Error enlisting occurred in Typescript
+             * 
+             */
+            errors: [],
+            /**
+             * @description Maybe someday you 'll have use for it...
+             */
+            payload: {},
+            /**
+             * @description This identifier used in which events... ?
+             */
+            label: [],
+            /**
+             * @description Identified has already been named in such events.
+             */
+            tags: [],
+            /**
+             * @description Small graph for CPU spike register that was created during the execution of the Typescript command.
+             */
+            cpuUsage: [],
+            /**
+             * @description Small graph for MEMORY spike register that was created during the execution of the Typescript command.
+             */
+            memoryUsage: [],
+            /**
+             * @description Application was forced to restart due to excessive updates which can cause absurd changes and higher CPU spike.
+             */
+            forceRestart: false,
+            /**
+             * @description Estimated time marker for identification execution.
+             */
+            time: 0
+          })
+          interpreter.eventOn(a.parse())
+
+        })
 
         terminal.stdout.on('close', () => {
           resolve(null)
@@ -98,11 +205,14 @@ const checkProjectSettings = (obj) => {
     if (Array.isArray(obj.command)) {
       let objPosition = -1
 
-
-      for (const cmd in obj.command) {
+      for (const cmd of obj.command) {
         objPosition++
-        if (!Array.isArray(cmd) || typeof cmd == 'string') {
+        if (!Array.isArray(cmd) && typeof cmd !== 'string') {
           throw Error(`TSC/JS - [0x120] You must have a command::[(${objPosition}).'${cmd}']. Please check the field! [command]`)
+        } else {
+          if (typeof cmd[objPosition][0] !== 'string') {
+            throw Error(`TSC/JS - [0x1223] You must have a command::[(${objPosition}).'${cmd}']. Please check the field! [command]`)
+          }
         }
       }
     }
@@ -129,7 +239,14 @@ module.exports = class TSProjectWrapper extends EventEmitter {
     super()
     this.projects = new Map()
   }
+  /**
+   * @description This is very important to start a project.In this case, it will check events of these projects.
+   * @returns TSProjectWrapper
+   */
+  startWatchEvents() {
 
+    return this;
+  }
 
   async start(projects, options = {
     'hotReload': true,
@@ -146,12 +263,13 @@ module.exports = class TSProjectWrapper extends EventEmitter {
         if (project.watchMode == false) {
           if (checkProject(project)) {
             const interpreter = TSInterpreter.createDefault()
-            const terminal = await openTerminal(project.projectDir, project, options)
+            const terminal = await openTerminal(project.projectDir, project, options, interpreter)
             const eventTerminal = EventEmitter
             this.emit('startingProject', terminal, this)
             this.projects.set(project.name, {
               terminal: terminal,
-              events: eventTerminal
+              events: eventTerminal,
+              interpreter: interpreter
             })
             await wait(3 * 1000)
 
@@ -165,16 +283,19 @@ module.exports = class TSProjectWrapper extends EventEmitter {
       for (const project of projects) {
         if (project.watchMode == true) {
           if (checkProject(project)) {
-
-            const terminal = openTerminal(project.projectDir, project, options)
+            const interpreter = TSInterpreter.createDefault()
+            const terminal = openTerminal(project.projectDir, project, options, interpreter)
             const eventTerminal = EventEmitter
             this.emit('startingProject', terminal, this)
             this.projects.set(project.name, {
               terminal: terminal,
-              events: eventTerminal
+              events: eventTerminal,
+              interpreter: interpreter
             })
 
-
+            interpreter.on('debugData', (data) => {
+              // 
+            })
           } else {
             throw Error('There was a problem with the project!')
           }
