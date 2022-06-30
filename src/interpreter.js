@@ -52,9 +52,9 @@ class InterpreterInterface extends EventEmitter {
     if (dataOriginal === undefined) {
       dataOriginal = null
     }
-    
+
     const parse = ReadingData.parsingData(metadataInterpreter.eventName, metadataInterpreter.metadata)
- 
+
     this.emit(parse.event, parse.metadata, metadataInterpreter, this)
     this.emit('debug', parse.metadata, metadataInterpreter, this)
     this.emit('debugData', {
@@ -151,6 +151,9 @@ class IdentifyInterpreter {
      * @description Estimated time marker for identification execution.
      */
     this.time = typeof options.time === 'number' ? options.time : 0
+
+
+    this.isWatch = false
   }
 
 
@@ -213,7 +216,10 @@ class ReadingData {
 /**
  * @description This class can effectively read and create events to be able to manage hot loading and other library resources.
  */
-module.exports = class TSInterpreter extends InterpreterInterface {
+class TSInterpreter extends InterpreterInterface {
+  constructor() {
+    super();
+  }
   /**
    * @description Identify which event is being handled to finally be valid and load to other resources.
    * @returns Validator
@@ -354,4 +360,12 @@ module.exports = class TSInterpreter extends InterpreterInterface {
   }
 
 
+}
+
+module.exports = {
+  TSInterpreter,
+  ReadingData,
+
+  MetadataInterPreter,
+  IdentifyInterpreter
 }

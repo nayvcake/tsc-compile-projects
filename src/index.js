@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const EventEmitter = require('events')
 const TSInterpreter = require('./interpreter')
+const { HotReloadUtils } = require('./hotreload')
 
 
 const openTerminal = async (file, options, optionsProject, interpreter) => {
@@ -55,7 +56,9 @@ const openTerminal = async (file, options, optionsProject, interpreter) => {
             /**
              * @description Maybe someday you 'll have use for it...
              */
-            payload: {},
+            payload: {
+              project: optionsProject
+            },
             /**
              * @description This identifier used in which events... ?
              */
@@ -119,7 +122,9 @@ const openTerminal = async (file, options, optionsProject, interpreter) => {
             /**
              * @description Maybe someday you 'll have use for it...
              */
-            payload: {},
+            payload: {
+              project: optionsProject
+            },
             /**
              * @description This identifier used in which events... ?
              */
@@ -238,9 +243,10 @@ module.exports = class TSProjectWrapper extends EventEmitter {
   constructor() {
     super()
     this.projects = new Map()
+    this.hotReloadManager = new HotReloadUtils.HotReloadResource(this)
   }
   /**
-   * @description This is very important to start a project.In this case, it will check events of these projects.
+   * @description This is very important to start a project. In this case, it will check events of these projects.
    * @returns TSProjectWrapper
    */
   startWatchEvents() {
