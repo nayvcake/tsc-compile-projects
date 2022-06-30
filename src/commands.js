@@ -2,6 +2,7 @@ const EventEmitter = require('events')
 
 class CommandBlock extends EventEmitter {
   constructor(projectWrapper) {
+    super();
     this.commandRunning = null
     this.command = ''
     this.started = Date.now()
@@ -9,7 +10,7 @@ class CommandBlock extends EventEmitter {
     this.projectWrapper = projectWrapper
   }
 
-  
+
 
   create(command, options) {
     const {
@@ -53,6 +54,7 @@ class CommandBlock extends EventEmitter {
 
 class CommandManagerTerminal extends EventEmitter {
   constructor(projectWrapper) {
+    super();
     this.commands = []
     this.projectWrapper = projectWrapper
   }

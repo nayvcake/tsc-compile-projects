@@ -56,6 +56,7 @@ class BucketLava {
  */
 class HotReloadResource extends EventEmitter {
   constructor(projectWrapper) {
+    super();
     this.projectWrapper = projectWrapper
     this.buckets = new Map()
     this.restarting = {}

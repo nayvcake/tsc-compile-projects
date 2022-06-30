@@ -1,8 +1,14 @@
 const fs = require('fs')
 const path = require('path')
 const EventEmitter = require('events')
-const TSInterpreter = require('./interpreter')
-const { HotReloadUtils } = require('./hotreload')
+const {
+  TSInterpreter,
+  IdentifyInterpreter,
+  MetadataInterPreter
+} = require('./interpreter')
+const {
+  HotReloadUtils
+} = require('./hotreload')
 
 
 const openTerminal = async (file, options, optionsProject, interpreter) => {
@@ -150,7 +156,7 @@ const openTerminal = async (file, options, optionsProject, interpreter) => {
              */
             time: 0
           })
-          interpreter.eventOn(a.parse())
+          interpreter.eventOn(a.parse(), this)
 
         })
 
