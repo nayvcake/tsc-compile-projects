@@ -55,7 +55,7 @@ class CommandBlock extends EventEmitter {
 
   async restart() {
     if (this.commandRunning !== null) {
-      await this.commandRunning.kill(-1)
+      await this.commandRunning.kill(2)
     }
     this
       .watchOn()
@@ -67,7 +67,7 @@ class CommandBlock extends EventEmitter {
     if (this.commandRunning !== null) {
 
       this.emit('destroy', this.commandRunning, this)
-      await this.commandRunning.kill(-1)
+      await this.commandRunning.kill(2)
     }
   }
 
