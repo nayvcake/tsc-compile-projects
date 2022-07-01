@@ -1,5 +1,8 @@
 const EventEmitter = require('events')
 const {
+  CommandUtils
+} = require('./commands')
+const {
   IdentifyInterpreter,
   TSInterpreter
 } = require('./interpreter')
@@ -8,39 +11,58 @@ const {
 /**
  * @description This class was built to load and carry the payload over the Typescript construct to bring up important classes like Full Lava Bucket.
  */
-class BucketLava {
+class BucketLava extends EventEmitter {
   constructor(interpreter, hotreload, commandBlock) {
+    super()
     this.loading = 0
-    this.commandBlock = null
+    this.restartBy = []
+    if (commandBlock instanceof CommandUtils.CommandBlock) {
+      this.commandBlock = commandBlock
+    }
     this.internalTime = null
     if (hotreload instanceof HotReloadResource) {
       this.hotreload = hotreload
     } else {
       throw Error('A terrible bug has occurred. Report this in the project.')
     }
-    if (interpreter instanceof IdentifyInterpreter) {
-      this.interpreter = interpreter
-    } else {
-      throw Error('A terrible bug has occurred. Report this in the project.')
-    }
+    // if (interpreter instanceof IdentifyInterpreter) {
+    //   this.interpreter = interpreter
+    // } else {
+    //   throw Error('A terrible bug has occurred. Report this in the project.')
+    // }
   }
 
   del() {
-    this.hotreload.buckets.delete(this.interpreter.payload.project.name)
+    // this.hotreload.buckets.delete(this.interpreter.payload.project.name)
     clearInterval(this.internalTime)
     this.internalTime = null
   }
 
-  create() {
+
+  restartTime() {
+    clearInterval(this.internalTime)
+    this.internalTime = null
+    this.createTime()
+  }
+
+  createTime() {
     this.internalTime = setInterval(() => {
       // Checking ... 
       if (this.loading === 0) {
-        this.interpreter.on('restarting', {
+        this.emit('restarting', {
           bucketLava: this,
-          interpreter: this.interpreter,
-          hotreload: this.hotreload
+          interpreter: null,
+          hotreload: this.hotreload,
+          restartBy: this.restartBy
         })
 
+        for (const a of this.restartBy) {
+          this.restartBy.pop()
+        }
+
+        setTimeout(() => {
+          this.commandBlock.restart()
+        }, 1 * 1000) // Added 1 seconds of delay.
 
         clearInterval(this.internalTime)
         this.internalTime = null
@@ -60,6 +82,7 @@ class HotReloadResource extends EventEmitter {
     super();
     this.projectWrapper = projectWrapper
     this.buckets = new Map()
+    this.restart = 0
     this.restarting = {}
     this.on('createBucket', (interpreter) => {
       if (interpreter instanceof IdentifyInterpreter) {
@@ -73,12 +96,65 @@ class HotReloadResource extends EventEmitter {
         this.buckets.get(project.name).del()
       }
     })
+    this.on('alertOfRestart', (identifyInterpreter) => {
+      this.addRestart(identifyInterpreter)
+    })
   }
-  
-  createBucket(interpreter, options) {
+
+  removeRestart(identifyInterpreter) {
+
+    for (const node of this.buckets) {
+      for (const n of node) {
+        if (n instanceof BucketLava) {
+
+          n.restartTime()
+          if (identifyInterpreter instanceof IdentifyInterpreter) {
+            for (const a of n.restartBy) {
+              if (identifyInterpreter.projectName == a) {
+                this.restart--
+                n.loading--
+                n.restartBy.push(identifyInterpreter.projectName)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+  addRestart(identifyInterpreter) {
+    for (const node of this.buckets) {
+      for (const n of node) {
+        if (n instanceof BucketLava) {
+
+          n.restartTime()
+          if (identifyInterpreter instanceof IdentifyInterpreter) {
+            for (const a of n.restartBy) {
+              if (identifyInterpreter.projectName !== a) {
+                this.restart++
+                n.loading++
+                n.restartBy.push(identifyInterpreter.projectName)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  createBucketWithoutInterpreter(commandBlock) {
+    return this.buckets.set(Math.random(Math.floor() * 100000000), new BucketLava(null, this, commandBlock))
+  }
+  /**
+   * @testing true
+   * @param {*} interpreter 
+   * @param {*} commandBlock 
+   */
+  createBucket(interpreter, commandBlock) {
     if (interpreter instanceof IdentifyInterpreter) {
       if (interpreter.isWatch) {
-        this.buckets.set(interpreter.payload.project.name, new BucketLava(interpreter, this))
+        this.buckets.set(interpreter.payload.project.name, new BucketLava(interpreter, this, commandBlock))
       }
     }
   }

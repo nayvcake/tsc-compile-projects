@@ -1,4 +1,5 @@
-const EventEmitter = require('events')
+const EventEmitter = require('events');
+const Logging = require('./logging');
 
 class CommandBlock extends EventEmitter {
   constructor(projectWrapper) {
@@ -6,27 +7,44 @@ class CommandBlock extends EventEmitter {
     this._id = Math.random(Math.floor() * 100999999)
     this.commandRunning = null
     this.command = ''
+    this.options = {}
     this.started = Date.now()
     this.restarted = 0
     this.projectWrapper = projectWrapper
   }
 
 
-  async create(command = '', options = {}) {
+  create(command = '', options = {}) {
     const {
       spawn
     } = require('child_process');
+    if (this.command == '') {
+      this.command = command
+      this.options = options
+    }
     this.commandRunning = spawn(command, options)
     this.commandRunning.stdout.on('data', async (data) => {
+      let message = ''
+
       if (data instanceof Buffer) {
+        message = data.toString('utf-8')
         this.emit('log', data.toString('utf-8'))
       } else if (data instanceof String) {
+        message = data
         this.emit('log', data)
       } else {
         try {
           this.emit('log', JSON.parse(data))
         } catch (_) {}
       }
+
+      Logging.emitLog(this.projectWrapper, {
+        logging: 'javascript',
+        data: {
+          message: message,
+          commandBlock: this
+        }
+      })
     })
     this.command = command
     this.started = Date.now()
@@ -39,14 +57,15 @@ class CommandBlock extends EventEmitter {
     if (this.commandRunning !== null) {
       await this.commandRunning.kill(-1)
     }
-    await this
+    this
       .watchOn()
-      .create()
+      .create(this.command, this.options)
   }
 
 
   async destroy() {
     if (this.commandRunning !== null) {
+
       this.emit('destroy', this.commandRunning, this)
       await this.commandRunning.kill(-1)
     }
@@ -55,9 +74,9 @@ class CommandBlock extends EventEmitter {
   watchOn() {
     this.on('kill', () => this.commandRunning.kill(-1))
     this.once('create', () => {
-      this.commandRunning.on('exit', () => {
+      this.commandRunning.on('exit', args => {
         this.commandRunning = null
-        this.emit('exit', true, this)
+        this.emit('exit', true, this, args)
       })
       this.commandRunning.on('disconnect', () => {
         this.commandRunning = null

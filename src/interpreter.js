@@ -45,7 +45,7 @@ class InterpreterInterface extends EventEmitter {
   /**
    * @description A method that will manage the events to trigger the event load in the class mainly being extended to the main base. Once the data is analyzed we will be able to manage the events better to have the best hot reload.
    */
-  eventOn(metadataInterpreter = new MetadataInterPreter(), dataOriginal) {
+  eventOn(metadataInterpreter = new MetadataInterPreter(), dataOriginal, interpreter) {
     if (dataOriginal instanceof Buffer) {
       dataOriginal = dataOriginal.toString('utf-8')
     }
@@ -62,7 +62,8 @@ class InterpreterInterface extends EventEmitter {
       metadataInterpreter: metadataInterpreter,
       dataOriginal: dataOriginal,
       parse: parse,
-      interpreterInterface: this
+      interpreterInterface: this,
+      interpreter: interpreter
     })
   }
 }
@@ -74,6 +75,7 @@ class InterpreterInterface extends EventEmitter {
  */
 class IdentifyInterpreter {
   constructor(options = {
+    projectName: '',
     /**
      * @description There are several events to identify and resolve function
      */
@@ -117,6 +119,7 @@ class IdentifyInterpreter {
      */
     time: 0
   }) {
+    this.projectName = ''
     /**
      * @description There are several events to identify and resolve function
      */
@@ -313,6 +316,7 @@ class TSInterpreter extends InterpreterInterface {
    * @returns 
    */
   static createIdentifyInterpreter(options = {
+    projectName: '',
     /**
      * @description There are several events to identify and resolve function
      */
