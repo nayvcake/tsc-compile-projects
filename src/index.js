@@ -367,7 +367,7 @@ module.exports = class TSProjectWrapper extends EventEmitter {
         if (project.watchMode == true) {
           if (checkProject(project)) {
 
-            const terminal = openTerminal(project.projectDir, project, options, this.interpreter, project.name, this)
+            const terminal = await openTerminal(project.projectDir, project, options, this.interpreter, project.name, this)
             const eventTerminal = EventEmitter
             this.emit('startingProject', terminal, this)
             this.projects.set(project.name, {
