@@ -9,6 +9,9 @@ const {
 const {
   HotReloadUtils
 } = require('./hotreload')
+const {
+  CommandUtils
+} = require('./commands')
 
 
 const openTerminal = async (file, options, optionsProject, interpreter) => {
@@ -250,6 +253,7 @@ module.exports = class TSProjectWrapper extends EventEmitter {
     super()
     this.projects = new Map()
     this.hotReloadManager = new HotReloadUtils.HotReloadResource(this)
+    this.commandManager = new CommandUtils.CommandManagerTerminal(this)
   }
   /**
    * @description This is very important to start a project. In this case, it will check events of these projects.
@@ -311,6 +315,27 @@ module.exports = class TSProjectWrapper extends EventEmitter {
           } else {
             throw Error('There was a problem with the project!')
           }
+        }
+      }
+
+      if (Array.isArray(options.command)) {
+        for (const cmd of options.command) {
+          if (Array.isArray(cmd)) {
+            const command = cmd[0] !== null ? cmd[0] : ''
+            const optionsShell = cmd[1] !== null ? cmd[1] : {}
+
+            this.commandManager.registerBlock(CommandUtils.CommandManagerTerminal.createCommandBlock(this, command, optionsShell))
+          }
+        }
+      } else {
+        if (typeof options.command == 'object') {
+          const command = options.command.run === null ? options.command.run : ''
+          const optionsShell = options.command.options === null ? options.command.options : {}
+
+          this.commandManager.registerBlock(CommandUtils.CommandManagerTerminal.createCommandBlock(this, command, optionsShell))
+        } else if (typeof options.command === 'string') {
+          const command = options.command
+          this.commandManager.registerBlock(CommandUtils.CommandManagerTerminal.createCommandBlock(this, command, {}))
         }
       }
     } else {

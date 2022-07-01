@@ -31,6 +31,7 @@ class CommandBlock extends EventEmitter {
     this.command = command
     this.started = Date.now()
     this.restarted = 0
+    this.emit('create', true)
   }
 
 
@@ -53,16 +54,18 @@ class CommandBlock extends EventEmitter {
 
   watchOn() {
     this.on('kill', () => this.commandRunning.kill(-1))
-    this.commandRunning.on('exit', () => {
-      this.commandRunning = null
-      this.emit('exit', true, this)
-    })
-    this.commandRunning.on('disconnect', () => {
-      this.commandRunning = null
-      this.emit('disconnect', true, this)
-    })
-    this.commandRunning.on('error', (err) => {
-      this.emit('error', err, this)
+    this.once('create', () => {
+      this.commandRunning.on('exit', () => {
+        this.commandRunning = null
+        this.emit('exit', true, this)
+      })
+      this.commandRunning.on('disconnect', () => {
+        this.commandRunning = null
+        this.emit('disconnect', true, this)
+      })
+      this.commandRunning.on('error', (err) => {
+        this.emit('error', err, this)
+      })
     })
     return this
   }
