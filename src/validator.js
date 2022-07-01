@@ -35,7 +35,7 @@ const validatorCountOfError = function (msg = '') {
   if (msg instanceof Buffer) {
     msg = msg.toString('utf-8')
   }
-  if (msg.match(/Found [0-9]+ error\.|Found [0-9]+ error\. Watching for file changes\./g) === null) {
+  if (msg.match(/Found [0-9]+ error\.|Found [0-9]+ error\. Watching for file changes|Found [0-9]+ errors\.|Found [0-9]+ errors\. Watching for file changes\./g) === null) {
     return false
   }
   return true
@@ -51,7 +51,7 @@ const validatorStarting = function (msg = '') {
   if (msg instanceof Buffer) {
     msg = msg.toString('utf-8')
   }
-  if (msg.match(/Starting compilation in watch mode\.\.\./g) === null) {
+  if (msg.match(/Starting compilation in watch mode/g) === null) {
     return false
   }
   return true

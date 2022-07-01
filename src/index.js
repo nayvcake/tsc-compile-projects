@@ -124,7 +124,6 @@ const openTerminal = async (file, options, optionsProject, interpreter, projectN
             }
           }
         })
-        resolve()
       })
     }
     if (optionsProject.lowCpuUsage) {
