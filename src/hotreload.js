@@ -9,8 +9,9 @@ const {
  * @description This class was built to load and carry the payload over the Typescript construct to bring up important classes like Full Lava Bucket.
  */
 class BucketLava {
-  constructor(interpreter, hotreload) {
+  constructor(interpreter, hotreload, commandBlock) {
     this.loading = 0
+    this.commandBlock = null
     this.internalTime = null
     if (hotreload instanceof HotReloadResource) {
       this.hotreload = hotreload
