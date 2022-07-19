@@ -67,6 +67,7 @@ const openTerminal = async (file, options, optionsProject, interpreter, projectN
           })
 
           const event = TSInterpreter.validateEvent(data)
+
           const a = TSInterpreter.createIdentifyInterpreter({
             projectName: projectName,
             /**
@@ -159,7 +160,7 @@ const openTerminal = async (file, options, optionsProject, interpreter, projectN
 
           const event = TSInterpreter.validateEvent(data)
           const a = TSInterpreter.createIdentifyInterpreter({
-            projectName: projectName,
+            projectName,
             /**
              * @description There are several events to identify and resolve function
              */
@@ -181,7 +182,6 @@ const openTerminal = async (file, options, optionsProject, interpreter, projectN
              */
             payload: {
               project: optionsProject,
-
             },
             /**
              * @description This identifier used in which events... ?
@@ -326,7 +326,6 @@ module.exports = class TSProjectWrapper extends EventEmitter {
    * @returns TSProjectWrapper
    */
   startWatchEvents() {
-
     return this;
   }
 
