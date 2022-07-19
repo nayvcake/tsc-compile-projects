@@ -211,9 +211,10 @@ class ReadingData {
       }
     }
 
-    if (msg.a instanceof Buffer) {
-      msg = UtilsTSC.removeItems(msg.a.toString('utf-8'))
+    if (data instanceof Buffer) {
+      data = UtilsTSC.removeItems(msg.a.toString('utf-8'))
     }
+    
     return {
       event: Event.EVENT_UNKNOWN,
       metadata: {
