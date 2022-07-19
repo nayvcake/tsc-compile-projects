@@ -119,7 +119,10 @@ class IdentifyInterpreter {
      */
     time: 0
   }) {
-    this.projectName = ''
+    /**
+     * @description Set the project name for identification.
+     */
+    this.projectName = options.projectName === 'string' ? 'unknown' :  options.projectName
     /**
      * @description There are several events to identify and resolve function
      */
@@ -218,7 +221,7 @@ class ReadingData {
         isError: false,
         code: '',
         event: Event.EVENT_ANY,
-        message: data
+        message: data,
       },
     }
   }
@@ -378,7 +381,6 @@ class TSInterpreter extends InterpreterInterface {
 module.exports = {
   TSInterpreter,
   ReadingData,
-
   MetadataInterPreter,
   IdentifyInterpreter
 }
