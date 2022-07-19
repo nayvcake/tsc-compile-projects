@@ -180,37 +180,46 @@ class ReadingData {
    * @returns 
    */
   static parsingData(event = Event.EVENT_UNKNOWN, data = '') {
-
-    switch (event) {
-      case Event.ERROR_TS: {
-        return {
-          event: Event.ERROR_TS,
-          metadata: Tracking.trackError(data),
-        }
+    if (event == Event.ERROR_TS) {
+      return {
+        event: Event.ERROR_TS,
+        metadata: Tracking.trackError(data),
       }
-      case Event.EVENT_ANY: {
-        return {
-          event: Event.EVENT_ANY,
-          metadata: Tracking.trackOther(data),
-        }
+    } else if (event == Event.EVENT_ANY) {
+      return {
+        event: Event.EVENT_ANY,
+        metadata: Tracking.trackOther(data),
       }
-      case Event.STARTING_COMPILATION: {
-        return {
+    } else if (event == Event.STARTING_COMPILATION) {
+      return {
+        event: Event.STARTING_COMPILATION,
+        metadata: {
+          file: '',
+          isError: false,
+          code: '',
           event: Event.STARTING_COMPILATION,
-          metadata: Tracking.trackError(data),
-        }
+          message: 'Watch mode...'
+        },
       }
+    } else if (event == Event.EVENT_FIND_COUNT_OF_ERROR) {
+      return {
+        event: Event.EVENT_FIND_COUNT_OF_ERROR,
+        metadata: Tracking.trackInfo(data),
+      }
+    }
 
-      case Event.EVENT_FIND_COUNT_OF_ERROR: {
-        return {
-          event: Event.EVENT_FIND_COUNT_OF_ERROR,
-          metadata: Tracking.trackInfo(data),
-        }
-      }
+    if (msg.a instanceof Buffer) {
+      msg = UtilsTSC.removeItems(msg.a.toString('utf-8'))
     }
     return {
       event: Event.EVENT_UNKNOWN,
-      metadata: {},
+      metadata: {
+        file: '',
+        isError: false,
+        code: '',
+        event: Event.EVENT_ANY,
+        message: data
+      },
     }
   }
 }
