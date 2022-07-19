@@ -19,11 +19,15 @@ const trackError = function (msg = '') {
     isError: true,
     code: '',
     event: Event.ERROR_TS,
-    message: ''
+    message: '',
+    messageOriginal: msg,
   }
 
   const getMessage = msg.replace(/.* error TS[0-9]+:/g, '')
-  const getFile = `${msg}`.search(/[A-Za-z\.0-9]\.ts/g) === 0 ? msg.replace(/(\.ts.*)/g, '') + '.ts' : null
+  let getFile = []
+  try {
+    getFile = `${msg}`.match(/.*[A-Za-z\.0-9]\.ts|.*[A-Za-z\.0-9]\.ts\:[0-9]+\:[0-9]+/g).length !== 0 ? `${msg}`.match(/.*[A-Za-z\.0-9]\.ts|.*[A-Za-z\.0-9]\.ts\:[0-9]+\:[0-9]+/g) : []
+  } catch (_) {}
   const getCodeError = msg.match(/TS[0-9]+/g) == null ? '' : msg.match(/TS[0-9]+/g)[0]
 
   data.message = getMessage
@@ -44,20 +48,17 @@ const trackOther = function (msg = '') {
     msg = UtilsTSC.removeItems(msg.a.toString('utf-8'))
   }
   let data = {
-    file: '',
+    file: [],
     isError: false,
     code: '',
     event: Event.EVENT_ANY,
-    message: ''
+    message: '',
+    messageOriginal: msg,
   }
 
   const getMessage = msg.replace(/.* error TS[0-9]+:/g, '')
-  const getFile = `${msg}`.search(/[A-Za-z\.0-9]\.ts/g) === 0 ? msg.replace(/(\.ts.*)/g, '') + '.ts' : null
-  const getCodeError = msg.match(/[a-z] TS[0-9]+/g) == null ? '' : msg.match(/[a-z] TS[0-9]+/g)[0]
 
   data.message = getMessage
-  data.file = getFile
-  data.code = getCodeError
 
 
   return data
