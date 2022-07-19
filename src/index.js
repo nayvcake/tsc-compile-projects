@@ -361,6 +361,9 @@ module.exports = class TSProjectWrapper extends EventEmitter {
         }
       }
 
+
+      this.emit('endCompile', true)
+
       // Only projects that use watchMode
       for (const project of projects) {
         if (project.watchMode == true) {
@@ -392,6 +395,8 @@ module.exports = class TSProjectWrapper extends EventEmitter {
           }
         }
       }
+
+      this.emit('runCommands', true)
 
       if (Array.isArray(options.command)) {
         for (const cmd of options.command) {
