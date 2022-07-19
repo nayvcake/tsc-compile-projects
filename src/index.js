@@ -330,12 +330,12 @@ module.exports = class TSProjectWrapper extends EventEmitter {
     return this;
   }
 
-  async start(projects, options = {
-    'hotReload': true,
-    'command': "node .",
-    'lowCpuUsage': true,
-    'targets': []
-  }) {
+  async managerDefault(projects, options = {
+      'hotReload': true,
+      'command': "node .",
+      'lowCpuUsage': true,
+      'targets': []
+    }) {
     let ready = false
     if (Array.isArray(projects)) {
       this.emit('startingProject', projects)
@@ -429,6 +429,15 @@ module.exports = class TSProjectWrapper extends EventEmitter {
       throw Error('TSC/JS - [x-x] Something went wrong when starting a project!')
     }
     ready = true
+  }
+
+  async start(projects, options = {
+    'hotReload': true,
+    'command': "node .",
+    'lowCpuUsage': true,
+    'targets': []
+  }) {
+    this.managerDefault(projects, options)
     return this
   }
 
