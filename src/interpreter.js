@@ -8,6 +8,9 @@ const {
 const {
   Validator
 } = require('./validator');
+const {
+  UtilsTSC
+} = require('./utils')
 
 /**
  * @description A small package to decorate the metadata entry.
@@ -214,7 +217,7 @@ class ReadingData {
     if (data instanceof Buffer) {
       data = UtilsTSC.removeItems(msg.a.toString('utf-8'))
     }
-    
+
     return {
       event: Event.EVENT_UNKNOWN,
       metadata: {
