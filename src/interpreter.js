@@ -187,10 +187,10 @@ class ReadingData {
    */
   static parsingData(event = Event.EVENT_UNKNOWN, data = '') {
     if (data.a !== undefined) {
-      data = UtilsTSC.removeItems(msg.a.toString('utf-8'))
+      data = UtilsTSC.removeItems(data.a.toString('utf-8'))
     } else {
       if (data instanceof Buffer) {
-        data = UtilsTSC.removeItems(msg.toString('utf-8'))
+        data = UtilsTSC.removeItems(data.toString('utf-8'))
       }
     }
     if (event == Event.ERROR_TS) {
