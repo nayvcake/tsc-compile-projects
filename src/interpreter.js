@@ -8,6 +8,9 @@ const {
 const {
   Validator
 } = require('./validator');
+const {
+  UtilsTSC
+} = require('./utils')
 
 /**
  * @description A small package to decorate the metadata entry.
@@ -119,7 +122,10 @@ class IdentifyInterpreter {
      */
     time: 0
   }) {
-    this.projectName = ''
+    /**
+     * @description Set the project name for identification.
+     */
+    this.projectName = options.projectName === 'string' ? 'unknown' :  options.projectName
     /**
      * @description There are several events to identify and resolve function
      */
@@ -180,37 +186,50 @@ class ReadingData {
    * @returns 
    */
   static parsingData(event = Event.EVENT_UNKNOWN, data = '') {
-
-    switch (event) {
-      case Event.ERROR_TS: {
-        return {
-          event: Event.ERROR_TS,
-          metadata: Tracking.trackError(data),
-        }
-      }
-      case Event.EVENT_ANY: {
-        return {
-          event: Event.EVENT_ANY,
-          metadata: Tracking.trackOther(data),
-        }
-      }
-      case Event.STARTING_COMPILATION: {
-        return {
-          event: Event.STARTING_COMPILATION,
-          metadata: Tracking.trackError(data),
-        }
-      }
-
-      case Event.EVENT_FIND_COUNT_OF_ERROR: {
-        return {
-          event: Event.EVENT_FIND_COUNT_OF_ERROR,
-          metadata: Tracking.trackInfo(data),
-        }
+    if (data.a !== undefined) {
+      data = UtilsTSC.removeItems(data.a.toString('utf-8'))
+    } else {
+      if (data instanceof Buffer) {
+        data = UtilsTSC.removeItems(data.toString('utf-8'))
       }
     }
+    if (event == Event.ERROR_TS) {
+      return {
+        event: Event.ERROR_TS,
+        metadata: Tracking.trackError(data),
+      }
+    } else if (event == Event.EVENT_ANY) {
+      return {
+        event: Event.EVENT_ANY,
+        metadata: Tracking.trackOther(data),
+      }
+    } else if (event == Event.STARTING_COMPILATION) {
+      return {
+        event: Event.STARTING_COMPILATION,
+        metadata: {
+          file: '',
+          isError: false,
+          code: '',
+          event: Event.STARTING_COMPILATION,
+          message: 'Watch mode...'
+        },
+      }
+    } else if (event == Event.EVENT_FIND_COUNT_OF_ERROR) {
+      return {
+        event: Event.EVENT_FIND_COUNT_OF_ERROR,
+        metadata: Tracking.trackInfo(data),
+      }
+    }
+   
     return {
       event: Event.EVENT_UNKNOWN,
-      metadata: {},
+      metadata: {
+        file: '',
+        isError: false,
+        code: '',
+        event: Event.EVENT_ANY,
+        message: data,
+      },
     }
   }
 }
@@ -369,7 +388,6 @@ class TSInterpreter extends InterpreterInterface {
 module.exports = {
   TSInterpreter,
   ReadingData,
-
   MetadataInterPreter,
   IdentifyInterpreter
 }

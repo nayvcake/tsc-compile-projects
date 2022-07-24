@@ -67,6 +67,7 @@ const openTerminal = async (file, options, optionsProject, interpreter, projectN
           })
 
           const event = TSInterpreter.validateEvent(data)
+
           const a = TSInterpreter.createIdentifyInterpreter({
             projectName: projectName,
             /**
@@ -159,7 +160,7 @@ const openTerminal = async (file, options, optionsProject, interpreter, projectN
 
           const event = TSInterpreter.validateEvent(data)
           const a = TSInterpreter.createIdentifyInterpreter({
-            projectName: projectName,
+            projectName,
             /**
              * @description There are several events to identify and resolve function
              */
@@ -181,7 +182,6 @@ const openTerminal = async (file, options, optionsProject, interpreter, projectN
              */
             payload: {
               project: optionsProject,
-
             },
             /**
              * @description This identifier used in which events... ?
@@ -326,16 +326,15 @@ module.exports = class TSProjectWrapper extends EventEmitter {
    * @returns TSProjectWrapper
    */
   startWatchEvents() {
-
     return this;
   }
 
-  async start(projects, options = {
-    'hotReload': true,
-    'command': "node .",
-    'lowCpuUsage': true,
-    'targets': []
-  }) {
+  async managerDefault(projects, options = {
+      'hotReload': true,
+      'command': "node .",
+      'lowCpuUsage': true,
+      'targets': []
+    }) {
     let ready = false
     if (Array.isArray(projects)) {
       this.emit('startingProject', projects)
@@ -360,6 +359,9 @@ module.exports = class TSProjectWrapper extends EventEmitter {
           }
         }
       }
+
+
+      this.emit('endCompile', true)
 
       // Only projects that use watchMode
       for (const project of projects) {
@@ -393,6 +395,8 @@ module.exports = class TSProjectWrapper extends EventEmitter {
         }
       }
 
+      this.emit('runCommands', true)
+
       if (Array.isArray(options.command)) {
         for (const cmd of options.command) {
           if (Array.isArray(cmd)) {
@@ -424,6 +428,15 @@ module.exports = class TSProjectWrapper extends EventEmitter {
       throw Error('TSC/JS - [x-x] Something went wrong when starting a project!')
     }
     ready = true
+  }
+
+  async start(projects, options = {
+    'hotReload': true,
+    'command': "node .",
+    'lowCpuUsage': true,
+    'targets': []
+  }) {
+    this.managerDefault(projects, options)
     return this
   }
 
